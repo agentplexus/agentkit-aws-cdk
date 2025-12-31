@@ -1,4 +1,4 @@
-# agentkit-aws-cdk
+# AgentKit for AWS CDK
 
 [![Build Status][build-status-svg]][build-status-url]
 [![Lint Status][lint-status-svg]][lint-status-url]
