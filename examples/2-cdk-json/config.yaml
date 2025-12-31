@@ -1,0 +1,56 @@
+# Alternative: YAML configuration
+# Rename to config.json or update main.go to use config.yaml
+
+stackName: stats-agent-team
+description: Statistics research and verification multi-agent system
+
+agents:
+  - name: research
+    description: Research agent - web search via Serper
+    containerImage: ghcr.io/agentplexus/stats-research:latest
+    memoryMB: 512
+    timeoutSeconds: 30
+    environment:
+      LOG_LEVEL: info
+
+  - name: synthesis
+    description: Synthesis agent - extract statistics from URLs
+    containerImage: ghcr.io/agentplexus/stats-synthesis:latest
+    memoryMB: 1024
+    timeoutSeconds: 120
+
+  - name: verification
+    description: Verification agent - validate sources
+    containerImage: ghcr.io/agentplexus/stats-verification:latest
+    memoryMB: 512
+    timeoutSeconds: 60
+
+  - name: orchestration
+    description: Orchestration agent - coordinate workflow
+    containerImage: ghcr.io/agentplexus/stats-orchestration:latest
+    memoryMB: 512
+    timeoutSeconds: 300
+    isDefault: true
+
+vpc:
+  createVPC: true
+  vpcCidr: 10.0.0.0/16
+  maxAZs: 2
+  enableVPCEndpoints: true
+
+observability:
+  provider: opik
+  project: stats-agent-team
+  apiKeySecretARN: arn:aws:secretsmanager:us-east-1:123456789:secret:opik-key
+  enableCloudWatchLogs: true
+  logRetentionDays: 30
+
+iam:
+  enableBedrockAccess: true
+
+tags:
+  Project: stats-agent-team
+  Environment: production
+  Team: ai-platform
+
+removalPolicy: destroy
