@@ -327,7 +327,7 @@ my-project/
 
 ## License
 
-Apache 2.0
+MIT
 
  [build-status-svg]: https://github.com/agentplexus/agentkit-aws-cdk/actions/workflows/ci.yaml/badge.svg?branch=main
  [build-status-url]: https://github.com/agentplexus/agentkit-aws-cdk/actions/workflows/ci.yaml

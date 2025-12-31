@@ -117,4 +117,4 @@ go get github.com/agentplexus/agentkit-aws-cdk
 
 ## License
 
-Apache 2.0
+MIT
