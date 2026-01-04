@@ -8,8 +8,9 @@ This release adds full AWS Bedrock AgentCore resource creation using CloudFormat
 
 - **AgentCore Runtime creation** - Full `AWS::BedrockAgentCore::Runtime` resource support
 - **Runtime Endpoint creation** - Automatic `AWS::BedrockAgentCore::RuntimeEndpoint` for each agent
+- **Gateway support** - Multi-agent routing via `AWS::BedrockAgentCore::Gateway`
 - **Protocol support** - HTTP, MCP, and A2A protocol configuration
-- **Enhanced outputs** - Runtime ARNs, IDs, and Endpoint ARNs for each agent
+- **Enhanced outputs** - Runtime ARNs, IDs, Endpoint ARNs, and Gateway URLs
 
 ## New Features
 
@@ -65,6 +66,27 @@ agents:
     protocol: MCP  # HTTP (default), MCP, or A2A
 ```
 
+### Gateway Support
+
+Enable multi-agent routing with a Gateway:
+
+```yaml
+gateway:
+  enabled: true
+  name: my-gateway
+  description: Multi-agent routing gateway
+  targets:
+    - research
+    - orchestration
+```
+
+When enabled, creates:
+
+- `AWS::BedrockAgentCore::Gateway` resource
+- Gateway URL output for invocation
+
+Note: GatewayTarget support (linking to RuntimeEndpoints) requires additional configuration and is planned for a future release.
+
 ## API Changes
 
 ### New Stack Fields
@@ -76,6 +98,9 @@ type AgentCoreStack struct {
     // NEW: Maps of created AgentCore resources
     Runtimes  map[string]awsbedrockagentcore.CfnRuntime
     Endpoints map[string]awsbedrockagentcore.CfnRuntimeEndpoint
+
+    // NEW: Multi-agent Gateway (if enabled)
+    Gateway awsbedrockagentcore.CfnGateway
 }
 ```
 
@@ -102,8 +127,14 @@ type GatewayConfig    = iac.GatewayConfig
 // Get tags for agent resources
 (s *AgentCoreStack) getTags(config *AgentConfig) *map[string]*string
 
+// Get tags for stack-level resources
+(s *AgentCoreStack) getStackTags() *map[string]*string
+
 // Add CloudFormation outputs for an agent
 (s *AgentCoreStack) addAgentOutputs(config *AgentConfig)
+
+// Create Gateway resource if enabled
+(s *AgentCoreStack) createGateway()
 ```
 
 ## Example Deployment
@@ -176,6 +207,9 @@ stats-agent-team.Agent-research-EndpointArn = arn:aws:bedrock:us-east-1:12345678
 stats-agent-team.Agent-orchestration-RuntimeArn = ...
 stats-agent-team.Agent-orchestration-RuntimeId = ...
 stats-agent-team.Agent-orchestration-EndpointArn = ...
+stats-agent-team.GatewayArn = arn:aws:bedrock:us-east-1:123456789012:gateway/...  # if gateway enabled
+stats-agent-team.GatewayId = ...
+stats-agent-team.GatewayUrl = https://...bedrock-agentcore.us-east-1.amazonaws.com/...
 ```
 
 ## Dependencies
@@ -190,11 +224,11 @@ stats-agent-team.Agent-orchestration-EndpointArn = ...
 - [x] AgentCore Runtime creation
 - [x] Runtime Endpoint creation
 - [x] Protocol configuration
+- [x] Gateway creation
 - [x] Enhanced outputs
 
 ### Planned for v0.3.0
 
-- [ ] Gateway support (`AWS::BedrockAgentCore::Gateway`)
 - [ ] Gateway targets (`AWS::BedrockAgentCore::GatewayTarget`)
 - [ ] Memory support (`AWS::BedrockAgentCore::Memory`)
 - [ ] Authorizer configuration
