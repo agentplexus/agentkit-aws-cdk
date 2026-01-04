@@ -66,6 +66,9 @@ type AgentCoreStack struct {
 
 	// Endpoints contains the AgentCore runtime endpoint resources.
 	Endpoints map[string]awsbedrockagentcore.CfnRuntimeEndpoint
+
+	// Gateway is the multi-agent routing gateway (if enabled).
+	Gateway awsbedrockagentcore.CfnGateway
 }
 
 // AgentConstruct represents a single AgentCore agent.
@@ -119,6 +122,9 @@ func NewAgentCoreStack(scope constructs.Construct, id string, config StackConfig
 	for _, agentConfig := range config.Agents {
 		s.createAgent(agentConfig)
 	}
+
+	// Create gateway if enabled
+	s.createGateway()
 
 	// Add outputs
 	s.addOutputs()
@@ -607,6 +613,45 @@ func (s *AgentCoreStack) addAgentOutputs(config *AgentConfig) {
 		})
 }
 
+// createGateway creates the AWS::BedrockAgentCore::Gateway resource if enabled.
+func (s *AgentCoreStack) createGateway() {
+	if s.Config.Gateway == nil || !s.Config.Gateway.Enabled {
+		return
+	}
+
+	// Determine protocol type from first agent or default to MCP
+	protocolType := "MCP"
+	if len(s.Config.Agents) > 0 && s.Config.Agents[0].Protocol != "" {
+		protocolType = s.Config.Agents[0].Protocol
+	}
+
+	// Default authorizer type to NONE
+	authorizerType := "NONE"
+
+	gateway := awsbedrockagentcore.NewCfnGateway(s.Stack,
+		jsii.String("Gateway"),
+		&awsbedrockagentcore.CfnGatewayProps{
+			Name:           jsii.String(s.Config.Gateway.Name),
+			Description:    jsii.String(s.Config.Gateway.Description),
+			AuthorizerType: jsii.String(authorizerType),
+			ProtocolType:   jsii.String(protocolType),
+			RoleArn:        s.ExecutionRole.RoleArn(),
+			Tags:           s.getStackTags(),
+		},
+	)
+
+	s.Gateway = gateway
+}
+
+// getStackTags returns tags for stack-level resources.
+func (s *AgentCoreStack) getStackTags() *map[string]*string {
+	tags := make(map[string]*string)
+	for k, v := range s.Config.Tags {
+		tags[k] = jsii.String(v)
+	}
+	return &tags
+}
+
 // addOutputs adds CloudFormation outputs.
 func (s *AgentCoreStack) addOutputs() {
 	if s.VPC != nil {
@@ -642,6 +687,24 @@ func (s *AgentCoreStack) addOutputs() {
 		Value:       jsii.String(fmt.Sprintf("%d", len(s.Agents))),
 		Description: jsii.String("Number of deployed agents"),
 	})
+
+	// Gateway outputs
+	if s.Gateway != nil {
+		awscdk.NewCfnOutput(s.Stack, jsii.String("GatewayArn"), &awscdk.CfnOutputProps{
+			Value:       s.Gateway.AttrGatewayArn(),
+			Description: jsii.String("Gateway ARN"),
+		})
+
+		awscdk.NewCfnOutput(s.Stack, jsii.String("GatewayId"), &awscdk.CfnOutputProps{
+			Value:       s.Gateway.AttrGatewayIdentifier(),
+			Description: jsii.String("Gateway ID"),
+		})
+
+		awscdk.NewCfnOutput(s.Stack, jsii.String("GatewayUrl"), &awscdk.CfnOutputProps{
+			Value:       s.Gateway.AttrGatewayUrl(),
+			Description: jsii.String("Gateway URL for invocation"),
+		})
+	}
 }
 
 // convertTags converts a map to CDK tags.
