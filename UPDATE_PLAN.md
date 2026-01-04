@@ -1,7 +1,8 @@
 # Update Plan: AgentCore Resource Creation
 
 **Created:** January 4, 2026
-**Status:** Draft
+**Updated:** January 4, 2026
+**Status:** In Progress
 **Target Version:** v0.2.0
 
 ## Overview
@@ -12,7 +13,87 @@ Update agentkit-aws-cdk to use the now-available CloudFormation L1 resources for
 
 - **September 2025**: AWS added CloudFormation, VPC, and PrivateLink support for AgentCore
 - **October 2025**: AWS Bedrock AgentCore went GA
-- **Current State**: agentkit-aws-cdk has placeholder code waiting on AWS support (lines 442-448 of `stack.go`)
+- **December 2025**: AWS added A2A (Agent-to-Agent) protocol support
+- **Current State**: Core Runtime and Endpoint creation implemented; Gateway support added
+
+---
+
+## AgentCore Communication Architecture
+
+Understanding the correct use of each AgentCore component:
+
+### Communication Patterns
+
+| Component | Purpose | Use Case |
+|-----------|---------|----------|
+| **Runtime + Endpoint** | Host individual agents | Each agent runs in a Runtime with an Endpoint for invocation |
+| **A2A Protocol** | Agent-to-agent communication | Agents communicate directly via A2A endpoints |
+| **Gateway** | Expose external tools to agents | APIs, Lambda functions, MCP servers |
+| **GatewayTarget** | Register tools with Gateway | NOT for agent-to-agent communication |
+
+### Key Insight: A2A vs Gateway
+
+**Gateway + GatewayTarget** is for exposing **tools** (external APIs, Lambda functions, MCP servers) to agents - it does NOT provide agent-to-agent communication.
+
+**A2A Protocol** is for **agent-to-agent communication**. Agents expose A2A endpoints and communicate directly using the standardized A2A protocol (JSON-RPC 2.0 over HTTP/S).
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Multi-Agent Architecture                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   ┌──────────────┐     A2A      ┌──────────────┐                │
+│   │  Research    │◄────────────►│ Orchestrator │                │
+│   │   Agent      │              │    Agent     │                │
+│   │  (Runtime)   │              │  (Runtime)   │                │
+│   └──────────────┘              └──────┬───────┘                │
+│          ▲                             │                        │
+│          │ A2A                    A2A  │                        │
+│          │                             ▼                        │
+│   ┌──────────────┐              ┌──────────────┐                │
+│   │  Synthesis   │◄────────────►│ Verification │                │
+│   │    Agent     │     A2A      │    Agent     │                │
+│   │  (Runtime)   │              │  (Runtime)   │                │
+│   └──────────────┘              └──────────────┘                │
+│                                                                  │
+│   ┌─────────────────────────────────────────────┐               │
+│   │              Gateway (Optional)              │               │
+│   │  ┌─────────┐  ┌─────────┐  ┌─────────┐     │               │
+│   │  │ Serper  │  │ Weather │  │ Custom  │     │               │
+│   │  │   API   │  │   API   │  │ Lambda  │     │               │
+│   │  └─────────┘  └─────────┘  └─────────┘     │               │
+│   │           (External Tools via MCP)          │               │
+│   └─────────────────────────────────────────────┘               │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Implications for stats-agent-team
+
+The stats-agent-team agents already implement A2A protocol (`a2a.go` files). This is the **correct approach**:
+
+1. Each agent gets a Runtime + RuntimeEndpoint
+2. Agents communicate via A2A protocol (already implemented)
+3. Gateway is optional - useful for exposing external tools (e.g., Serper API)
+4. GatewayTarget is NOT needed for agent-to-agent routing
+
+---
+
+## Implementation Status
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| Phase 1 | Core Runtime + Endpoint creation | ✅ Complete |
+| Phase 2 | Config schema updates | ✅ Complete |
+| Phase 3 | Gateway support | ✅ Complete (basic) |
+| Phase 3b | GatewayTarget | ⏸️ Deferred (not needed for A2A) |
+| Phase 4 | Memory support | 🔲 Pending |
+
+---
+
+## Previous State (Historical)
+
+**Location**: Lines 442-448 of `agentcore/stack.go` (now replaced)
 
 ## Current State
 
@@ -39,14 +120,16 @@ Update agentkit-aws-cdk to use the now-available CloudFormation L1 resources for
 
 ## Target CloudFormation Resources
 
-| Resource | Purpose | Priority |
-|----------|---------|----------|
-| `AWS::BedrockAgentCore::Runtime` | Agent execution environment | P0 |
-| `AWS::BedrockAgentCore::RuntimeEndpoint` | Agent invocation endpoint | P0 |
-| `AWS::BedrockAgentCore::Gateway` | Multi-agent communication | P1 |
-| `AWS::BedrockAgentCore::GatewayTarget` | Gateway target configuration | P1 |
-| `AWS::BedrockAgentCore::Memory` | Agent memory/state | P2 |
-| `AWS::BedrockAgentCore::WorkloadIdentity` | Workload IAM | P2 |
+| Resource | Purpose | Priority | Status |
+|----------|---------|----------|--------|
+| `AWS::BedrockAgentCore::Runtime` | Agent execution environment | P0 | ✅ Done |
+| `AWS::BedrockAgentCore::RuntimeEndpoint` | Agent invocation endpoint | P0 | ✅ Done |
+| `AWS::BedrockAgentCore::Gateway` | Expose external tools via MCP | P1 | ✅ Done |
+| `AWS::BedrockAgentCore::GatewayTarget` | Register tools with Gateway | P1 | ⏸️ Deferred |
+| `AWS::BedrockAgentCore::Memory` | Agent memory/state | P2 | 🔲 Pending |
+| `AWS::BedrockAgentCore::WorkloadIdentity` | Workload IAM | P2 | 🔲 Pending |
+
+**Note:** GatewayTarget is for registering external tools (APIs, Lambda, MCP servers) with the Gateway. It is NOT used for agent-to-agent communication - agents communicate directly via the A2A protocol.
 
 ## CloudFormation Resource Schemas
 
@@ -314,9 +397,11 @@ type GatewayConfig struct {
 
 ---
 
-### Phase 3: Multi-Agent Gateway (P1)
+### Phase 3: Gateway for External Tools (P1) ✅ Complete
 
-#### 3.1 Create Gateway Resource
+**Important Clarification:** Gateway is for exposing **external tools** to agents via MCP, NOT for agent-to-agent communication. Agents communicate directly via A2A protocol.
+
+#### 3.1 Create Gateway Resource (Implemented)
 
 ```go
 func (s *AgentCoreStack) createGateway() {
@@ -324,36 +409,66 @@ func (s *AgentCoreStack) createGateway() {
         return
     }
 
+    // Determine protocol type from first agent or default to MCP
+    protocolType := "MCP"
+    if len(s.Config.Agents) > 0 && s.Config.Agents[0].Protocol != "" {
+        protocolType = s.Config.Agents[0].Protocol
+    }
+
     gateway := awsbedrockagentcore.NewCfnGateway(s.Stack,
-        jsii.String("AgentGateway"),
+        jsii.String("Gateway"),
         &awsbedrockagentcore.CfnGatewayProps{
-            Name:        jsii.String(s.Config.Gateway.Name),
-            Description: jsii.String(s.Config.Gateway.Description),
-            Tags:        s.getStackTags(),
+            Name:           jsii.String(s.Config.Gateway.Name),
+            Description:    jsii.String(s.Config.Gateway.Description),
+            AuthorizerType: jsii.String("NONE"),
+            ProtocolType:   jsii.String(protocolType),
+            RoleArn:        s.ExecutionRole.RoleArn(),
+            Tags:           s.getStackTags(),
         },
     )
 
     s.Gateway = gateway
-
-    // Create gateway targets for each agent
-    for _, agentName := range s.Config.Gateway.Targets {
-        s.createGatewayTarget(gateway, agentName)
-    }
-}
-
-func (s *AgentCoreStack) createGatewayTarget(gateway awsbedrockagentcore.CfnGateway, agentName string) {
-    endpoint := s.Endpoints[agentName]
-
-    awsbedrockagentcore.NewCfnGatewayTarget(s.Stack,
-        jsii.String(fmt.Sprintf("GatewayTarget-%s", agentName)),
-        &awsbedrockagentcore.CfnGatewayTargetProps{
-            GatewayIdentifier: gateway.AttrGatewayId(),
-            Name:              jsii.String(agentName),
-            EndpointArn:       endpoint.AttrAgentRuntimeEndpointArn(),
-        },
-    )
 }
 ```
+
+#### 3.2 GatewayTarget (Deferred)
+
+GatewayTarget is for registering **external tools** with the Gateway, not for routing to agents. The API requires:
+
+- `CredentialProviderConfigurations` - How Gateway authenticates to the tool
+- `TargetConfiguration` - MCP server endpoint, Lambda ARN, or OpenAPI schema
+
+This is useful for integrating external services (e.g., Serper API, custom Lambda tools) but is NOT needed for agent-to-agent communication.
+
+```go
+// Example: Registering an external MCP server as a tool
+awsbedrockagentcore.NewCfnGatewayTarget(s.Stack,
+    jsii.String("SerperTool"),
+    &awsbedrockagentcore.CfnGatewayTargetProps{
+        Name:              jsii.String("serper-search"),
+        GatewayIdentifier: gateway.AttrGatewayIdentifier(),
+        CredentialProviderConfigurations: []interface{}{
+            &CredentialProviderConfigurationProperty{
+                CredentialProviderType: jsii.String("API_KEY"),
+                CredentialProvider: &CredentialProviderProperty{
+                    ApiKeyCredentialProvider: &ApiKeyCredentialProviderProperty{
+                        ProviderArn: jsii.String("arn:aws:secretsmanager:..."),
+                    },
+                },
+            },
+        },
+        TargetConfiguration: &TargetConfigurationProperty{
+            Mcp: &McpTargetConfigurationProperty{
+                McpServer: &McpServerTargetConfigurationProperty{
+                    Endpoint: jsii.String("https://mcp.serper.dev"),
+                },
+            },
+        },
+    },
+)
+```
+
+**Status:** Deferred until a concrete use case for external tool integration is identified.
 
 ---
 
@@ -404,44 +519,42 @@ stackName: stats-agent-team
 description: Statistics research and verification multi-agent system
 
 agents:
+  # Agents communicate via A2A protocol (implemented in a2a.go)
   - name: research
     containerImage: ghcr.io/agentplexus/stats-agent-research:v0.5.1
     memoryMB: 512
     timeoutSeconds: 30
-    protocol: HTTP
+    protocol: A2A  # Agent-to-agent protocol
     description: Research agent - web search via Serper
 
   - name: synthesis
     containerImage: ghcr.io/agentplexus/stats-agent-synthesis:v0.5.1
     memoryMB: 1024
     timeoutSeconds: 120
-    protocol: HTTP
+    protocol: A2A
     description: Synthesis agent - extract statistics from URLs
 
   - name: verification
     containerImage: ghcr.io/agentplexus/stats-agent-verification:v0.5.1
     memoryMB: 512
     timeoutSeconds: 60
-    protocol: HTTP
+    protocol: A2A
     description: Verification agent - validate sources
 
   - name: orchestration-eino
     containerImage: ghcr.io/agentplexus/stats-agent-orchestration-eino:v0.5.1
     memoryMB: 512
     timeoutSeconds: 300
-    protocol: HTTP
+    protocol: A2A
     isDefault: true
     description: Orchestration agent - coordinate workflow
 
-gateway:
-  enabled: true
-  name: stats-gateway
-  description: Gateway for stats-agent-team multi-agent communication
-  targets:
-    - research
-    - synthesis
-    - verification
-    - orchestration-eino
+# Gateway is OPTIONAL - only needed if exposing external tools via MCP
+# Agents communicate directly via A2A, NOT through the Gateway
+# gateway:
+#   enabled: true
+#   name: stats-tools-gateway
+#   description: Gateway for external tool access (Serper, etc.)
 
 vpc:
   createVPC: true
@@ -483,9 +596,10 @@ Outputs:
   SecurityGroupID = sg-0123456789abcdef0
   ExecutionRoleARN = arn:aws:iam::123456789012:role/stats-agent-team-execution-role
 
-  Agent-research-RuntimeArn = arn:aws:bedrock:us-east-1:123456789012:agent-runtime/research-abc123
-  Agent-research-RuntimeId = research-abc123
-  Agent-research-EndpointArn = arn:aws:bedrock:us-east-1:123456789012:agent-runtime-endpoint/research-endpoint-xyz789
+  # Each agent gets Runtime + Endpoint outputs
+  Agent-research-RuntimeArn = arn:aws:bedrock:us-east-1:123456789012:agent-runtime/...
+  Agent-research-RuntimeId = ...
+  Agent-research-EndpointArn = arn:aws:bedrock:us-east-1:123456789012:agent-runtime-endpoint/...
 
   Agent-synthesis-RuntimeArn = ...
   Agent-synthesis-RuntimeId = ...
@@ -499,9 +613,13 @@ Outputs:
   Agent-orchestration-eino-RuntimeId = ...
   Agent-orchestration-eino-EndpointArn = ...
 
-  GatewayArn = arn:aws:bedrock:us-east-1:123456789012:agent-gateway/stats-gateway-def456
-  GatewayId = stats-gateway-def456
+  # Gateway outputs (only if gateway.enabled = true)
+  GatewayArn = arn:aws:bedrock:us-east-1:123456789012:gateway/...
+  GatewayId = ...
+  GatewayUrl = https://...bedrock-agentcore.us-east-1.amazonaws.com/...
 ```
+
+**Note:** Agents use the RuntimeEndpoint ARNs to discover and communicate with each other via A2A protocol. The Gateway URL is only used if you're exposing external tools.
 
 ---
 
@@ -523,29 +641,29 @@ Outputs:
 
 - Deploy to AWS sandbox account
 - Verify runtime status becomes ACTIVE
-- Test endpoint invocation
-- Validate gateway routing (Phase 3)
+- Test A2A communication between agents
+- Verify endpoint invocation
 
 ### stats-agent-team Validation
 
 - Full deployment of 4-agent system
-- End-to-end workflow test
+- A2A protocol communication test
+- End-to-end workflow test (research → synthesis → verification)
 - Observability verification
 
 ---
 
-## Timeline Estimate
+## Progress Summary
 
-| Phase | Scope | Effort |
+| Phase | Scope | Status |
 |-------|-------|--------|
-| Phase 1 | Core Runtime + Endpoint | 2-3 days |
-| Phase 2 | Config schema updates | 1 day |
-| Phase 3 | Gateway support | 1-2 days |
-| Phase 4 | Memory support | 1 day |
-| Testing | All phases | 2 days |
-| Documentation | README, examples | 1 day |
-
-**Total: ~8-10 days**
+| Phase 1 | Core Runtime + Endpoint | ✅ Complete |
+| Phase 2 | Config schema updates | ✅ Complete |
+| Phase 3 | Gateway support | ✅ Complete |
+| Phase 3b | GatewayTarget | ⏸️ Deferred |
+| Phase 4 | Memory support | 🔲 Pending |
+| Testing | All phases | 🔲 Pending |
+| Documentation | README, examples | 🔲 Pending |
 
 ---
 

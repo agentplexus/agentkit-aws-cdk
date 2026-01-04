@@ -68,24 +68,22 @@ agents:
 
 ### Gateway Support
 
-Enable multi-agent routing with a Gateway:
+**Important:** Gateway is for exposing **external tools** to agents via MCP, NOT for agent-to-agent communication. Agents communicate directly via A2A protocol.
 
 ```yaml
+# Gateway is OPTIONAL - only needed for external tool integration
 gateway:
   enabled: true
-  name: my-gateway
-  description: Multi-agent routing gateway
-  targets:
-    - research
-    - orchestration
+  name: my-tools-gateway
+  description: Gateway for external tool access
 ```
 
 When enabled, creates:
 
 - `AWS::BedrockAgentCore::Gateway` resource
-- Gateway URL output for invocation
+- Gateway URL output for tool invocation
 
-Note: GatewayTarget support (linking to RuntimeEndpoints) requires additional configuration and is planned for a future release.
+**Note:** GatewayTarget (for registering external MCP servers, Lambda functions, or APIs) is deferred until a concrete use case is identified. For agent-to-agent communication, use the A2A protocol which agents implement directly.
 
 ## API Changes
 
@@ -223,15 +221,21 @@ stats-agent-team.GatewayUrl = https://...bedrock-agentcore.us-east-1.amazonaws.c
 
 - [x] AgentCore Runtime creation
 - [x] Runtime Endpoint creation
-- [x] Protocol configuration
-- [x] Gateway creation
+- [x] Protocol configuration (HTTP, MCP, A2A)
+- [x] Gateway creation (for external tools)
 - [x] Enhanced outputs
 
-### Planned for v0.3.0
+### Planned for Future Releases
 
-- [ ] Gateway targets (`AWS::BedrockAgentCore::GatewayTarget`)
 - [ ] Memory support (`AWS::BedrockAgentCore::Memory`)
-- [ ] Authorizer configuration
+- [ ] Authorizer configuration (IAM, Lambda)
+- [ ] GatewayTarget - for external tool registration (when use case identified)
+
+### Architecture Notes
+
+- **Agent-to-Agent Communication**: Use A2A protocol directly (agents implement this)
+- **External Tool Integration**: Use Gateway + GatewayTarget (optional)
+- **Gateway is NOT for agent routing** - it's for exposing external APIs/tools to agents
 
 ## Breaking Changes
 
