@@ -2,12 +2,25 @@
 
 **Document Type:** Technical Requirements Document
 **Status:** Draft
+**Priority:** P1 - Future Enhancement (not required for v0.2.0)
 **Date:** January 4, 2026
 **Author:** AgentPlexus Team
 
 ## Executive Summary
 
-This document defines the authentication architecture for agent-to-agent (A2A) communication in AgentPlexus when deployed on AWS Bedrock AgentCore. The key finding is that **AgentCore does NOT provide automatic mTLS or Nitro-enforced A2A encryption**. Instead, AWS expects you to use **IAM SigV4 or OAuth** for inter-agent authentication.
+This document defines the authentication architecture for agent-to-agent (A2A) communication in AgentPlexus when deployed on AWS Bedrock AgentCore. **This is a future enhancement, not a v0.2.0 requirement.**
+
+### v0.2.0 Scope
+
+v0.2.0 prioritizes a **functioning prototype** deployed on AgentCore via CDK. Baseline security is provided by:
+
+- VPC isolation (agents only reachable within VPC)
+- TLS in transit (HTTPS mandatory)
+- Security groups (network-level access control)
+
+### Future Enhancement (P1)
+
+For production deployments requiring zero-trust security, AWS expects you to use **IAM SigV4 or OAuth** for inter-agent authentication. AgentCore does NOT provide automatic mTLS or Nitro-enforced A2A encryption.
 
 ## Background
 
