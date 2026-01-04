@@ -1,6 +1,6 @@
 module github.com/agentplexus/agentkit-aws-cdk
 
-go 1.25.0
+go 1.25.5
 
 require (
 	github.com/agentplexus/agentkit v0.3.0
@@ -8,6 +8,9 @@ require (
 	github.com/aws/constructs-go/constructs/v10 v10.4.4
 	github.com/aws/jsii-runtime-go v1.127.0
 )
+
+// TODO: Remove before pushing - use local agentkit with Protocol and GatewayConfig fields
+replace github.com/agentplexus/agentkit => ../agentkit
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect

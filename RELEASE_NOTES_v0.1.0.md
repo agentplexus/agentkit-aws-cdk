@@ -1,4 +1,4 @@
-# agentkit-aws-cdk v0.1.0 Release Notes
+# AgentKit for AWS CDK v0.1.0 Release Notes
 
 **Release Date:** December 31, 2025
 

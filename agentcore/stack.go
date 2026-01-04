@@ -5,6 +5,7 @@ import (
 
 	"github.com/agentplexus/agentkit/platforms/agentcore/iac"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsbedrockagentcore"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslogs"
@@ -21,6 +22,8 @@ type (
 	SecretsConfig       = iac.SecretsConfig
 	ObservabilityConfig = iac.ObservabilityConfig
 	IAMConfig           = iac.IAMConfig
+	AuthorizerConfig    = iac.AuthorizerConfig
+	GatewayConfig       = iac.GatewayConfig
 )
 
 // Re-export default config functions from agentkit.
@@ -57,6 +60,12 @@ type AgentCoreStack struct {
 
 	// Agents contains the created agent constructs.
 	Agents map[string]*AgentConstruct
+
+	// Runtimes contains the AgentCore runtime resources.
+	Runtimes map[string]awsbedrockagentcore.CfnRuntime
+
+	// Endpoints contains the AgentCore runtime endpoint resources.
+	Endpoints map[string]awsbedrockagentcore.CfnRuntimeEndpoint
 }
 
 // AgentConstruct represents a single AgentCore agent.
@@ -92,9 +101,11 @@ func NewAgentCoreStack(scope constructs.Construct, id string, config StackConfig
 	})
 
 	s := &AgentCoreStack{
-		Stack:  stack,
-		Config: config,
-		Agents: make(map[string]*AgentConstruct),
+		Stack:     stack,
+		Config:    config,
+		Agents:    make(map[string]*AgentConstruct),
+		Runtimes:  make(map[string]awsbedrockagentcore.CfnRuntime),
+		Endpoints: make(map[string]awsbedrockagentcore.CfnRuntimeEndpoint),
 	}
 
 	// Create infrastructure
@@ -439,25 +450,161 @@ func (s *AgentCoreStack) createAgent(config AgentConfig) {
 		envVars["AGENTCORE_DEFAULT_AGENT"] = config.Name
 	}
 
-	// Note: The actual Bedrock AgentCore resource creation would go here.
-	// As of the current AWS CDK version, AgentCore may require L1 constructs
-	// (CfnAgent) or custom resources. The exact implementation depends on
-	// the AWS Bedrock AgentCore API availability in CDK.
-	//
-	// For now, we output the configuration that would be used.
-	// When AgentCore L2 constructs become available, this will be updated.
+	// Create AgentCore Runtime
+	s.createAgentRuntime(&config, envVars)
 
-	awscdk.NewCfnOutput(s.Stack, jsii.String(fmt.Sprintf("Agent-%s-Image", config.Name)), &awscdk.CfnOutputProps{
-		Value:       jsii.String(config.ContainerImage),
-		Description: jsii.String(fmt.Sprintf("Container image for agent %s", config.Name)),
-	})
+	// Create Runtime Endpoint
+	s.createRuntimeEndpoint(&config)
 
-	awscdk.NewCfnOutput(s.Stack, jsii.String(fmt.Sprintf("Agent-%s-Memory", config.Name)), &awscdk.CfnOutputProps{
-		Value:       jsii.String(fmt.Sprintf("%d", config.MemoryMB)),
-		Description: jsii.String(fmt.Sprintf("Memory allocation for agent %s", config.Name)),
-	})
+	// Add agent-specific outputs
+	s.addAgentOutputs(&config)
 
 	s.Agents[config.Name] = agentConstruct
+}
+
+// createAgentRuntime creates the AWS::BedrockAgentCore::Runtime resource.
+func (s *AgentCoreStack) createAgentRuntime(config *AgentConfig, envVars map[string]string) {
+	// Convert env vars to CDK format
+	cfnEnvVars := make(map[string]*string)
+	for k, v := range envVars {
+		cfnEnvVars[k] = jsii.String(v)
+	}
+
+	// Build network configuration
+	networkConfig := &awsbedrockagentcore.CfnRuntime_NetworkConfigurationProperty{
+		NetworkMode: jsii.String("VPC"),
+		NetworkModeConfig: &awsbedrockagentcore.CfnRuntime_VpcConfigProperty{
+			SecurityGroups: s.getSecurityGroupIds(),
+			Subnets:        s.getPrivateSubnetIds(),
+		},
+	}
+
+	// Build runtime props
+	runtimeProps := &awsbedrockagentcore.CfnRuntimeProps{
+		AgentRuntimeName: jsii.String(config.Name),
+		RoleArn:          s.ExecutionRole.RoleArn(),
+		Description:      jsii.String(config.Description),
+
+		AgentRuntimeArtifact: &awsbedrockagentcore.CfnRuntime_AgentRuntimeArtifactProperty{
+			ContainerConfiguration: &awsbedrockagentcore.CfnRuntime_ContainerConfigurationProperty{
+				ContainerUri: jsii.String(config.ContainerImage),
+			},
+		},
+
+		NetworkConfiguration:  networkConfig,
+		EnvironmentVariables:  &cfnEnvVars,
+		ProtocolConfiguration: jsii.String(s.getProtocol(config)),
+		Tags:                  s.getTags(config),
+	}
+
+	// Add lifecycle configuration if timeout or memory specified
+	if config.TimeoutSeconds > 0 || config.MemoryMB > 0 {
+		runtimeProps.LifecycleConfiguration = &awsbedrockagentcore.CfnRuntime_LifecycleConfigurationProperty{}
+		if config.TimeoutSeconds > 0 {
+			runtimeProps.LifecycleConfiguration.(*awsbedrockagentcore.CfnRuntime_LifecycleConfigurationProperty).MaxLifetime = jsii.Number(float64(config.TimeoutSeconds))
+		}
+	}
+
+	// Create the runtime
+	runtime := awsbedrockagentcore.NewCfnRuntime(s.Stack,
+		jsii.String(fmt.Sprintf("Runtime-%s", config.Name)),
+		runtimeProps,
+	)
+
+	s.Runtimes[config.Name] = runtime
+}
+
+// createRuntimeEndpoint creates the AWS::BedrockAgentCore::RuntimeEndpoint resource.
+func (s *AgentCoreStack) createRuntimeEndpoint(config *AgentConfig) {
+	runtime := s.Runtimes[config.Name]
+
+	endpoint := awsbedrockagentcore.NewCfnRuntimeEndpoint(s.Stack,
+		jsii.String(fmt.Sprintf("Endpoint-%s", config.Name)),
+		&awsbedrockagentcore.CfnRuntimeEndpointProps{
+			Name:           jsii.String(fmt.Sprintf("%s-endpoint", config.Name)),
+			AgentRuntimeId: runtime.AttrAgentRuntimeId(),
+			Description:    jsii.String(fmt.Sprintf("Endpoint for agent %s", config.Name)),
+			Tags:           s.getTags(config),
+		},
+	)
+
+	s.Endpoints[config.Name] = endpoint
+}
+
+// getPrivateSubnetIds returns the private subnet IDs for VPC configuration.
+func (s *AgentCoreStack) getPrivateSubnetIds() *[]*string {
+	if s.VPC == nil {
+		return &[]*string{}
+	}
+	subnets := s.VPC.PrivateSubnets()
+	if subnets == nil {
+		return &[]*string{}
+	}
+	ids := make([]*string, len(*subnets))
+	for i, subnet := range *subnets {
+		ids[i] = subnet.SubnetId()
+	}
+	return &ids
+}
+
+// getSecurityGroupIds returns the security group IDs for VPC configuration.
+func (s *AgentCoreStack) getSecurityGroupIds() *[]*string {
+	if s.SecurityGroup == nil {
+		return &[]*string{}
+	}
+	return &[]*string{s.SecurityGroup.SecurityGroupId()}
+}
+
+// getProtocol returns the protocol for the agent runtime.
+func (s *AgentCoreStack) getProtocol(config *AgentConfig) string {
+	if config.Protocol != "" {
+		return config.Protocol
+	}
+	return "HTTP" // Default protocol
+}
+
+// getTags returns the tags for an agent resource.
+func (s *AgentCoreStack) getTags(config *AgentConfig) *map[string]*string {
+	tags := make(map[string]*string)
+	for k, v := range s.Config.Tags {
+		tags[k] = jsii.String(v)
+	}
+	tags["Agent"] = jsii.String(config.Name)
+	return &tags
+}
+
+// addAgentOutputs adds CloudFormation outputs for an agent.
+func (s *AgentCoreStack) addAgentOutputs(config *AgentConfig) {
+	runtime := s.Runtimes[config.Name]
+	endpoint := s.Endpoints[config.Name]
+
+	awscdk.NewCfnOutput(s.Stack,
+		jsii.String(fmt.Sprintf("Agent-%s-RuntimeArn", config.Name)),
+		&awscdk.CfnOutputProps{
+			Value:       runtime.AttrAgentRuntimeArn(),
+			Description: jsii.String(fmt.Sprintf("Runtime ARN for agent %s", config.Name)),
+		})
+
+	awscdk.NewCfnOutput(s.Stack,
+		jsii.String(fmt.Sprintf("Agent-%s-RuntimeId", config.Name)),
+		&awscdk.CfnOutputProps{
+			Value:       runtime.AttrAgentRuntimeId(),
+			Description: jsii.String(fmt.Sprintf("Runtime ID for agent %s", config.Name)),
+		})
+
+	awscdk.NewCfnOutput(s.Stack,
+		jsii.String(fmt.Sprintf("Agent-%s-EndpointArn", config.Name)),
+		&awscdk.CfnOutputProps{
+			Value:       endpoint.AttrAgentRuntimeEndpointArn(),
+			Description: jsii.String(fmt.Sprintf("Endpoint ARN for agent %s", config.Name)),
+		})
+
+	awscdk.NewCfnOutput(s.Stack,
+		jsii.String(fmt.Sprintf("Agent-%s-Image", config.Name)),
+		&awscdk.CfnOutputProps{
+			Value:       jsii.String(config.ContainerImage),
+			Description: jsii.String(fmt.Sprintf("Container image for agent %s", config.Name)),
+		})
 }
 
 // addOutputs adds CloudFormation outputs.
