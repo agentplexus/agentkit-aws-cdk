@@ -8,6 +8,14 @@
 
 AWS CDK constructs for deploying [agentkit](https://github.com/agentplexus/agentkit)-based agents to AWS Bedrock AgentCore.
 
+## What's New in v0.2.0
+
+- **AgentCore Runtime creation** - Full `AWS::BedrockAgentCore::Runtime` resource support
+- **Runtime Endpoint creation** - Automatic `AWS::BedrockAgentCore::RuntimeEndpoint` for each agent
+- **Protocol configuration** - HTTP, MCP, and A2A protocol support
+- **Gateway support** - Optional `AWS::BedrockAgentCore::Gateway` for external tool integration
+- **Enhanced outputs** - Runtime ARNs, IDs, Endpoint ARNs per agent
+
 ## Scope
 
 This module provides **AWS CDK** constructs only. For other IaC tools:
@@ -136,12 +144,18 @@ agents:
     containerImage: ghcr.io/example/research:latest
     memoryMB: 512
     timeoutSeconds: 30
+    protocol: HTTP  # HTTP (default), MCP, or A2A
 
   - name: orchestration
     containerImage: ghcr.io/example/orchestration:latest
     memoryMB: 1024
     timeoutSeconds: 300
+    protocol: HTTP
     isDefault: true
+
+vpc:
+  createVPC: true
+  enableVPCEndpoints: true
 
 observability:
   provider: opik
@@ -246,6 +260,7 @@ See [examples/4-pure-cloudformation](examples/4-pure-cloudformation/) for comple
 | `agents` | []AgentConfig | Yes | List of agents to deploy |
 | `vpc` | VPCConfig | No | VPC configuration |
 | `observability` | ObservabilityConfig | No | Monitoring configuration |
+| `gateway` | GatewayConfig | No | Gateway for external tools |
 | `iam` | IAMConfig | No | IAM configuration |
 | `tags` | map[string]string | No | Resource tags |
 | `removalPolicy` | string | No | "destroy" or "retain" |
@@ -259,9 +274,20 @@ See [examples/4-pure-cloudformation](examples/4-pure-cloudformation/) for comple
 | `description` | string | No | Human-readable description |
 | `memoryMB` | int | No | Memory: 512, 1024, 2048, 4096, 8192, 16384 |
 | `timeoutSeconds` | int | No | Timeout: 1-900 seconds |
+| `protocol` | string | No | Communication protocol: HTTP (default), MCP, A2A |
 | `environment` | map[string]string | No | Environment variables |
 | `secretsARNs` | []string | No | Secret ARNs to inject |
 | `isDefault` | bool | No | Mark as default agent |
+
+### GatewayConfig
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `enabled` | bool | No | Enable Gateway creation |
+| `name` | string | No | Gateway name |
+| `description` | string | No | Gateway description |
+
+**Note:** Gateway is for exposing external tools to agents via MCP, not for agent-to-agent communication. Agents communicate directly via A2A protocol.
 
 ### VPCConfig
 
@@ -284,6 +310,25 @@ See [examples/4-pure-cloudformation](examples/4-pure-cloudformation/) for comple
 | `enableCloudWatchLogs` | bool | true | Enable CloudWatch Logs |
 | `logRetentionDays` | int | 30 | Log retention period |
 | `enableXRay` | bool | false | Enable X-Ray tracing |
+
+---
+
+## Stack Outputs
+
+After deployment, the stack outputs:
+
+| Output | Description |
+|--------|-------------|
+| `VPCID` | VPC identifier |
+| `SecurityGroupID` | Security group for agents |
+| `ExecutionRoleARN` | IAM role for agent execution |
+| `Agent-{name}-RuntimeArn` | Runtime ARN for IAM policies |
+| `Agent-{name}-RuntimeId` | Runtime ID for API calls |
+| `Agent-{name}-EndpointArn` | Endpoint ARN for invocation |
+| `Agent-{name}-Image` | Container image reference |
+| `GatewayArn` | Gateway ARN (if gateway enabled) |
+| `GatewayId` | Gateway ID (if gateway enabled) |
+| `GatewayUrl` | Gateway URL (if gateway enabled) |
 
 ---
 

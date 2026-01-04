@@ -10,6 +10,7 @@ agents:
     containerImage: ghcr.io/agentplexus/stats-research:latest
     memoryMB: 512
     timeoutSeconds: 30
+    protocol: HTTP
     environment:
       LOG_LEVEL: info
 
@@ -18,18 +19,21 @@ agents:
     containerImage: ghcr.io/agentplexus/stats-synthesis:latest
     memoryMB: 1024
     timeoutSeconds: 120
+    protocol: HTTP
 
   - name: verification
     description: Verification agent - validate sources
     containerImage: ghcr.io/agentplexus/stats-verification:latest
     memoryMB: 512
     timeoutSeconds: 60
+    protocol: HTTP
 
   - name: orchestration
     description: Orchestration agent - coordinate workflow
     containerImage: ghcr.io/agentplexus/stats-orchestration:latest
     memoryMB: 512
     timeoutSeconds: 300
+    protocol: HTTP
     isDefault: true
 
 vpc:
