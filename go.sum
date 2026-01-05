@@ -1,7 +1,7 @@
 github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1Xbatp0=
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
-github.com/agentplexus/agentkit v0.2.0 h1:Rxm8FmhmNj6p6vo2iU+hGzHzreOpWVG4Pw0XyiNuldY=
-github.com/agentplexus/agentkit v0.2.0/go.mod h1:wMF09HBREJgjjDGidfdfypTZXLA2QOumLGl/bMG/4cI=
+github.com/agentplexus/agentkit v0.3.0 h1:WTqsN4WSwMn1aSns9AEWaFfMOySDRNzdvaY9f3WdNX0=
+github.com/agentplexus/agentkit v0.3.0/go.mod h1:5GX/rCQDoQUt769F8DG1mI0CW6e3xJCNRzzz+QLiRLc=
 github.com/aws/aws-cdk-go/awscdk/v2 v2.233.0 h1:15peN4Rulrn354cLJI8nz0ZUKQOj8gC39nQaAmRTyE4=
 github.com/aws/aws-cdk-go/awscdk/v2 v2.233.0/go.mod h1:eipalawNVzVYRH6owUrIJwFS81LZXE7rdJV80KQmQ3c=
 github.com/aws/constructs-go/constructs/v10 v10.4.4 h1:LL7cFqtg3B4t0ut2shtGxxeubEc+uXY5DDoWoRBuLCs=
