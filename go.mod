@@ -4,9 +4,9 @@ go 1.24.11
 
 require (
 	github.com/agentplexus/agentkit v0.2.0
-	github.com/aws/aws-cdk-go/awscdk/v2 v2.233.0
+	github.com/aws/aws-cdk-go/awscdk/v2 v2.234.1
 	github.com/aws/constructs-go/constructs/v10 v10.4.4
-	github.com/aws/jsii-runtime-go v1.124.0
+	github.com/aws/jsii-runtime-go v1.125.0
 )
 
 require (
