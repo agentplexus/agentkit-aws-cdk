@@ -4,8 +4,8 @@ github.com/agentplexus/agentkit v0.3.0 h1:WTqsN4WSwMn1aSns9AEWaFfMOySDRNzdvaY9f3
 github.com/agentplexus/agentkit v0.3.0/go.mod h1:5GX/rCQDoQUt769F8DG1mI0CW6e3xJCNRzzz+QLiRLc=
 github.com/aws/aws-cdk-go/awscdk/v2 v2.235.0 h1:dDjplBQQmsEIkuJsriIN+UQ+qWyWnCCT0fBbdRhvKd0=
 github.com/aws/aws-cdk-go/awscdk/v2 v2.235.0/go.mod h1:hKEh17zZXzP8GStIg1V0QhigO0O39RjXj/gsW3olas8=
-github.com/aws/constructs-go/constructs/v10 v10.4.4 h1:LL7cFqtg3B4t0ut2shtGxxeubEc+uXY5DDoWoRBuLCs=
-github.com/aws/constructs-go/constructs/v10 v10.4.4/go.mod h1:BhiNi267cuLnCZpYK59k68wKYh5G5AF0SoVA8f4iyGo=
+github.com/aws/constructs-go/constructs/v10 v10.4.5 h1:sI7BEPucBQmbotxUF78qpCh4wP0ABvyinDLG7SOZIGE=
+github.com/aws/constructs-go/constructs/v10 v10.4.5/go.mod h1:L0tXWpvmTRneeFNX4efyD1haL1wQudQGHVXZWuLw74k=
 github.com/aws/jsii-runtime-go v1.125.0 h1:s5gM2ATWcCPQS61G5WHZZiqjUqejZFjed702OBrr4yo=
 github.com/aws/jsii-runtime-go v1.125.0/go.mod h1:67f+oydH0cMr//tkmNNj9QpKk02hNEEVu4CByxkpGB0=
 github.com/cdklabs/awscdk-asset-awscli-go/awscliv1/v2 v2.2.261 h1:1GuMxmibE09Etubch2vHk19qFC8ILckyLECXysZhvdM=
