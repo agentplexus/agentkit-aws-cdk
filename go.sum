@@ -2,8 +2,8 @@ github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/agentplexus/agentkit v0.3.0 h1:WTqsN4WSwMn1aSns9AEWaFfMOySDRNzdvaY9f3WdNX0=
 github.com/agentplexus/agentkit v0.3.0/go.mod h1:5GX/rCQDoQUt769F8DG1mI0CW6e3xJCNRzzz+QLiRLc=
-github.com/aws/aws-cdk-go/awscdk/v2 v2.235.0 h1:dDjplBQQmsEIkuJsriIN+UQ+qWyWnCCT0fBbdRhvKd0=
-github.com/aws/aws-cdk-go/awscdk/v2 v2.235.0/go.mod h1:hKEh17zZXzP8GStIg1V0QhigO0O39RjXj/gsW3olas8=
+github.com/aws/aws-cdk-go/awscdk/v2 v2.235.1 h1:JsHYSldmSkvS0Q5W7kC4cbLbXxm7DaRbXOh2nJAE7d4=
+github.com/aws/aws-cdk-go/awscdk/v2 v2.235.1/go.mod h1:hKEh17zZXzP8GStIg1V0QhigO0O39RjXj/gsW3olas8=
 github.com/aws/constructs-go/constructs/v10 v10.4.4 h1:LL7cFqtg3B4t0ut2shtGxxeubEc+uXY5DDoWoRBuLCs=
 github.com/aws/constructs-go/constructs/v10 v10.4.4/go.mod h1:BhiNi267cuLnCZpYK59k68wKYh5G5AF0SoVA8f4iyGo=
 github.com/aws/jsii-runtime-go v1.125.0 h1:s5gM2ATWcCPQS61G5WHZZiqjUqejZFjed702OBrr4yo=
