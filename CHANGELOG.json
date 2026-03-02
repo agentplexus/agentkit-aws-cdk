@@ -1,0 +1,90 @@
+{
+  "irVersion": "1.0",
+  "project": "agentkit-aws-cdk",
+  "repository": "https://github.com/plexusone/agentkit-aws-cdk",
+  "versioning": "semver",
+  "commitConvention": "conventional",
+  "maintainers": ["plexusone", "johncwang@gmail.com"],
+  "bots": ["dependabot[bot]"],
+  "releases": [
+    {
+      "version": "v0.2.0",
+      "date": "2026-03-01",
+      "highlights": [
+        { "description": "Module migrated from `agentplexus` to `plexusone` organization" },
+        { "description": "New CLI tools for one-command AWS AgentCore deployment" },
+        { "description": "Full AWS Bedrock AgentCore resource creation with Runtime, Endpoint, and Gateway support" }
+      ],
+      "breaking": [
+        { "description": "Module path changed from `github.com/agentplexus/agentkit-aws-cdk` to `github.com/plexusone/agentkit-aws-cdk`", "commit": "03aeda8" },
+        { "description": "Config directory changed from `~/.agentplexus/` to `~/.plexusone/` for CLI tools", "commit": "03aeda8" }
+      ],
+      "upgradeGuide": [
+        { "description": "Update import paths from `github.com/agentplexus/agentkit-aws-cdk` to `github.com/plexusone/agentkit-aws-cdk`" },
+        { "description": "Update go.mod dependency to `github.com/plexusone/agentkit-aws-cdk v0.2.0`" },
+        { "description": "If using CLI tools, move config from `~/.agentplexus/` to `~/.plexusone/`" }
+      ],
+      "added": [
+        { "description": "`cmd/deploy` CLI for one-command AWS AgentCore deployment with secrets push, CDK bootstrap, and deploy", "commit": "03aeda8" },
+        { "description": "`cmd/push-secrets` CLI for pushing .env files to AWS Secrets Manager", "commit": "03aeda8" },
+        { "description": "`AWS::BedrockAgentCore::Runtime` resource creation for each agent", "commit": "d48a19e" },
+        { "description": "`AWS::BedrockAgentCore::RuntimeEndpoint` automatic creation for each agent", "commit": "d48a19e" },
+        { "description": "`AWS::BedrockAgentCore::Gateway` support for external tool integration", "commit": "ff150ff" },
+        { "description": "Protocol configuration support (HTTP, MCP, A2A)", "commit": "d48a19e" },
+        { "description": "Enhanced CloudFormation outputs: RuntimeArn, RuntimeId, EndpointArn, GatewayUrl per agent", "commit": "d48a19e" },
+        { "description": "`Runtimes` and `Endpoints` maps on `AgentCoreStack` for accessing created resources", "commit": "d48a19e" },
+        { "description": "`Gateway` field on `AgentCoreStack` for gateway resource access", "commit": "ff150ff" },
+        { "description": "`AuthorizerConfig` and `GatewayConfig` type aliases re-exported from agentkit", "commit": "d48a19e" }
+      ],
+      "changed": [
+        { "description": "Module path migrated from `agentplexus` to `plexusone` organization", "commit": "03aeda8" },
+        { "description": "Dependency updated to `github.com/plexusone/agentkit v0.5.0`", "commit": "03aeda8" }
+      ],
+      "documentation": [
+        { "description": "Updated README and examples for v0.2.0 features", "commit": "b52a10e" },
+        { "description": "Added TRD for external tools integration with MCP server hosting options", "commit": "a3482c5" },
+        { "description": "Added TRD for agent-to-agent authentication", "commit": "cd48a5a" },
+        { "description": "Clarified Gateway vs A2A architecture documentation", "commit": "def325c" },
+        { "description": "Updated release notes with Gateway feature details", "commit": "81d25d2" }
+      ],
+      "dependencies": [
+        { "description": "Bump `github.com/aws/jsii-runtime-go` from 1.124.0 to 1.127.0", "commit": "d914c39" },
+        { "description": "Bump `github.com/aws/aws-cdk-go/awscdk/v2` to v2.240.0", "commit": "03aeda8" },
+        { "description": "Add AWS SDK Go v2 for CLI tools (secretsmanager, sts, config)", "commit": "03aeda8" }
+      ]
+    },
+    {
+      "version": "v0.1.1",
+      "date": "2026-01-02",
+      "changed": [
+        { "description": "Update license references", "commit": "9bc1b9c" }
+      ]
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2025-12-31",
+      "highlights": [
+        { "description": "Initial release of AWS CDK constructs for deploying agentkit-based agents to AWS Bedrock AgentCore" }
+      ],
+      "added": [
+        { "description": "`AgentCoreStack` CDK construct for deploying multi-agent systems" },
+        { "description": "`AgentBuilder` fluent API for configuring individual agents with memory, timeout, environment variables" },
+        { "description": "`StackBuilder` fluent API for composing agents with VPC, observability, and IAM settings" },
+        { "description": "`CfnIncludeBuilder` for importing existing CloudFormation templates into CDK" },
+        { "description": "`NewStackFromFile` and `MustNewStackFromFile` for loading configuration from JSON/YAML" },
+        { "description": "`NewStackFromJSON` and `NewStackFromYAML` for loading configuration from byte data" },
+        { "description": "Re-exported configuration types from `agentkit/platforms/agentcore/iac`" },
+        { "description": "VPC creation with optional VPC endpoints for AWS services" },
+        { "description": "Security group creation for agent communication" },
+        { "description": "IAM execution role with Bedrock, CloudWatch Logs, ECR, and Secrets Manager access" },
+        { "description": "Observability configuration support for Opik, Langfuse, Phoenix, and CloudWatch" },
+        { "description": "Four deployment approaches: CDK Go, CDK+JSON, CfnInclude, Pure CloudFormation" }
+      ],
+      "documentation": [
+        { "description": "README with comprehensive usage examples for all deployment approaches" },
+        { "description": "Example projects in `examples/` directory for each deployment approach" },
+        { "description": "Configuration reference for StackConfig, AgentConfig, VPCConfig, ObservabilityConfig" }
+      ]
+    }
+  ]
+}
