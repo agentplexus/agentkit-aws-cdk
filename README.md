@@ -10,13 +10,19 @@
 
 AWS CDK constructs for deploying [agentkit](https://github.com/plexusone/agentkit)-based agents to AWS Bedrock AgentCore.
 
-## What's New in v0.2.0
+## Features
 
-- **AgentCore Runtime creation** - Full `AWS::BedrockAgentCore::Runtime` resource support
-- **Runtime Endpoint creation** - Automatic `AWS::BedrockAgentCore::RuntimeEndpoint` for each agent
-- **Protocol configuration** - HTTP, MCP, and A2A protocol support
-- **Gateway support** - Optional `AWS::BedrockAgentCore::Gateway` for external tool integration
-- **Enhanced outputs** - Runtime ARNs, IDs, Endpoint ARNs per agent
+- 🚀 **AgentCore Runtime creation** - Full `AWS::BedrockAgentCore::Runtime` resource support
+- 🔗 **Runtime Endpoint creation** - Automatic `AWS::BedrockAgentCore::RuntimeEndpoint` for each agent
+- 📡 **Protocol configuration** - HTTP, MCP, and A2A protocol support
+- 🌐 **Gateway support** - Optional `AWS::BedrockAgentCore::Gateway` for external tool integration
+- 📊 **Enhanced outputs** - Runtime ARNs, IDs, Endpoint ARNs per agent
+- 🛠️ **CLI tools** - One-command deployment and secrets management
+- 🏗️ **CDK constructs** - `AgentCoreStack`, `AgentBuilder`, `StackBuilder` fluent APIs
+- 📁 **Config-driven** - Load stacks from JSON/YAML configuration files
+- 🔒 **VPC & Security** - Automatic VPC creation with security groups and VPC endpoints
+- 👁️ **Observability** - Opik, Langfuse, Phoenix, and CloudWatch integration
+- 🔄 **Four deployment approaches** - CDK Go, CDK+JSON, CfnInclude, Pure CloudFormation
 
 ## Scope
 
