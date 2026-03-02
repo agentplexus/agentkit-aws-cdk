@@ -6,7 +6,7 @@
 [![Docs][docs-godoc-svg]][docs-godoc-url]
 [![License][license-svg]][license-url]
 
-AWS CDK constructs for deploying [agentkit](https://github.com/agentplexus/agentkit)-based agents to AWS Bedrock AgentCore.
+AWS CDK constructs for deploying [agentkit](https://github.com/plexusone/agentkit)-based agents to AWS Bedrock AgentCore.
 
 ## What's New in v0.2.0
 
@@ -23,8 +23,8 @@ This module provides **AWS CDK** constructs only. For other IaC tools:
 | IaC Tool | Module | Dependencies |
 |----------|--------|--------------|
 | **AWS CDK** | `agentkit-aws-cdk` (this module) | 21 |
-| **Pulumi** | [agentkit-aws-pulumi](https://github.com/agentplexus/agentkit-aws-pulumi) | 340 |
-| **CloudFormation** | [agentkit](https://github.com/agentplexus/agentkit) (core) | 0 extra |
+| **Pulumi** | [agentkit-aws-pulumi](https://github.com/plexusone/agentkit-aws-pulumi) | 340 |
+| **CloudFormation** | [agentkit](https://github.com/plexusone/agentkit) (core) | 0 extra |
 
 All modules share the same YAML/JSON configuration schema from `agentkit/platforms/agentcore/iac/`.
 
@@ -63,12 +63,12 @@ agentkit-aws-cdk/                          # AWS CDK constructs (this module)
 
 **For CDK approaches (1-3):**
 ```bash
-go get github.com/agentplexus/agentkit-aws-cdk
+go get github.com/plexusone/agentkit-aws-cdk
 ```
 
 **For Pure CloudFormation (4):**
 ```bash
-go get github.com/agentplexus/agentkit
+go get github.com/plexusone/agentkit
 ```
 
 ---
@@ -80,7 +80,7 @@ Type-safe Go code with full IDE support and compile-time validation.
 ```go
 package main
 
-import "github.com/agentplexus/agentkit-aws-cdk/agentcore"
+import "github.com/plexusone/agentkit-aws-cdk/agentcore"
 
 func main() {
     app := agentcore.NewApp()
@@ -125,7 +125,7 @@ Minimal Go wrapper that loads configuration from JSON or YAML files. Perfect for
 ```go
 package main
 
-import "github.com/agentplexus/agentkit-aws-cdk/agentcore"
+import "github.com/plexusone/agentkit-aws-cdk/agentcore"
 
 func main() {
     app := agentcore.NewApp()
@@ -183,7 +183,7 @@ Import existing CloudFormation templates into CDK. Use CDK deployment tooling wh
 ```go
 package main
 
-import "github.com/agentplexus/agentkit-aws-cdk/agentcore"
+import "github.com/plexusone/agentkit-aws-cdk/agentcore"
 
 func main() {
     app := agentcore.NewApp()
@@ -217,7 +217,7 @@ import (
     "fmt"
     "os"
 
-    "github.com/agentplexus/agentkit/platforms/agentcore/iac"
+    "github.com/plexusone/agentkit/platforms/agentcore/iac"
 )
 
 func main() {
@@ -374,13 +374,13 @@ my-project/
 
 MIT
 
- [build-status-svg]: https://github.com/agentplexus/agentkit-aws-cdk/actions/workflows/ci.yaml/badge.svg?branch=main
- [build-status-url]: https://github.com/agentplexus/agentkit-aws-cdk/actions/workflows/ci.yaml
- [lint-status-svg]: https://github.com/agentplexus/agentkit-aws-cdk/actions/workflows/lint.yaml/badge.svg?branch=main
- [lint-status-url]: https://github.com/agentplexus/agentkit-aws-cdk/actions/workflows/lint.yaml
- [goreport-svg]: https://goreportcard.com/badge/github.com/agentplexus/agentkit-aws-cdk
- [goreport-url]: https://goreportcard.com/report/github.com/agentplexus/agentkit-aws-cdk
- [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/agentplexus/agentkit-aws-cdk
- [docs-godoc-url]: https://pkg.go.dev/github.com/agentplexus/agentkit-aws-cdk
+ [build-status-svg]: https://github.com/plexusone/agentkit-aws-cdk/actions/workflows/ci.yaml/badge.svg?branch=main
+ [build-status-url]: https://github.com/plexusone/agentkit-aws-cdk/actions/workflows/ci.yaml
+ [lint-status-svg]: https://github.com/plexusone/agentkit-aws-cdk/actions/workflows/lint.yaml/badge.svg?branch=main
+ [lint-status-url]: https://github.com/plexusone/agentkit-aws-cdk/actions/workflows/lint.yaml
+ [goreport-svg]: https://goreportcard.com/badge/github.com/plexusone/agentkit-aws-cdk
+ [goreport-url]: https://goreportcard.com/report/github.com/plexusone/agentkit-aws-cdk
+ [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/plexusone/agentkit-aws-cdk
+ [docs-godoc-url]: https://pkg.go.dev/github.com/plexusone/agentkit-aws-cdk
  [license-svg]: https://img.shields.io/badge/license-MIT-blue.svg
- [license-url]: https://github.com/agentplexus/agentkit-aws-cdk/blob/master/LICENSE
+ [license-url]: https://github.com/plexusone/agentkit-aws-cdk/blob/master/LICENSE

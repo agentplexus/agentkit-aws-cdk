@@ -7,7 +7,7 @@ description: Statistics research and verification multi-agent system
 agents:
   - name: research
     description: Research agent - web search via Serper
-    containerImage: ghcr.io/agentplexus/stats-research:latest
+    containerImage: ghcr.io/agentplexus/stats-agent-research:latest
     memoryMB: 512
     timeoutSeconds: 30
     environment:
@@ -15,19 +15,19 @@ agents:
 
   - name: synthesis
     description: Synthesis agent - extract statistics from URLs
-    containerImage: ghcr.io/agentplexus/stats-synthesis:latest
+    containerImage: ghcr.io/agentplexus/stats-agent-synthesis:latest
     memoryMB: 1024
     timeoutSeconds: 120
 
   - name: verification
     description: Verification agent - validate sources
-    containerImage: ghcr.io/agentplexus/stats-verification:latest
+    containerImage: ghcr.io/agentplexus/stats-agent-verification:latest
     memoryMB: 512
     timeoutSeconds: 60
 
   - name: orchestration
     description: Orchestration agent - coordinate workflow
-    containerImage: ghcr.io/agentplexus/stats-orchestration:latest
+    containerImage: ghcr.io/agentplexus/stats-agent-orchestration-eino:latest
     memoryMB: 512
     timeoutSeconds: 300
     isDefault: true

@@ -10,7 +10,7 @@
 package main
 
 import (
-	"github.com/agentplexus/agentkit-aws-cdk/agentcore"
+	"github.com/plexusone/agentkit-aws-cdk/agentcore"
 )
 
 func main() {

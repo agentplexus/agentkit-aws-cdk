@@ -4,8 +4,8 @@ package agentcore
 import (
 	"fmt"
 
-	"github.com/agentplexus/agentkit/platforms/agentcore/iac"
 	"github.com/aws/constructs-go/constructs/v10"
+	"github.com/plexusone/agentkit/platforms/agentcore/iac"
 )
 
 // Re-export config loading functions from agentkit for convenience.

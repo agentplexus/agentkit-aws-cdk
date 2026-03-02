@@ -10,33 +10,33 @@
 package main
 
 import (
-	"github.com/agentplexus/agentkit-aws-cdk/agentcore"
+	"github.com/plexusone/agentkit-aws-cdk/agentcore"
 )
 
 func main() {
 	app := agentcore.NewApp()
 
 	// Build agent configurations using the fluent builder API
-	research := agentcore.NewAgentBuilder("research", "ghcr.io/agentplexus/stats-research:latest").
+	research := agentcore.NewAgentBuilder("research", "ghcr.io/agentplexus/stats-agent-research:latest").
 		WithDescription("Research agent - web search via Serper").
 		WithMemory(512).
 		WithTimeout(30).
 		WithEnvVar("LOG_LEVEL", "info").
 		Build()
 
-	synthesis := agentcore.NewAgentBuilder("synthesis", "ghcr.io/agentplexus/stats-synthesis:latest").
+	synthesis := agentcore.NewAgentBuilder("synthesis", "ghcr.io/agentplexus/stats-agent-synthesis:latest").
 		WithDescription("Synthesis agent - extract statistics from URLs").
 		WithMemory(1024).
 		WithTimeout(120).
 		Build()
 
-	verification := agentcore.NewAgentBuilder("verification", "ghcr.io/agentplexus/stats-verification:latest").
+	verification := agentcore.NewAgentBuilder("verification", "ghcr.io/agentplexus/stats-agent-verification:latest").
 		WithDescription("Verification agent - validate sources").
 		WithMemory(512).
 		WithTimeout(60).
 		Build()
 
-	orchestration := agentcore.NewAgentBuilder("orchestration", "ghcr.io/agentplexus/stats-orchestration:latest").
+	orchestration := agentcore.NewAgentBuilder("orchestration", "ghcr.io/agentplexus/stats-agent-orchestration-eino:latest").
 		WithDescription("Orchestration agent - coordinate workflow").
 		WithMemory(512).
 		WithTimeout(300).

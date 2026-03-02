@@ -6,3 +6,10 @@ coverage.txt
 debug.test
 main
 main.zip
+bin/
+
+# CDK generated files
+cdk.out/
+cdk-app
+*.js
+!jest.config.js

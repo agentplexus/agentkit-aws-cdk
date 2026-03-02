@@ -16,22 +16,22 @@ Parameters:
 
   ResearchContainerImage:
     Type: String
-    Default: ghcr.io/agentplexus/stats-research:latest
+    Default: ghcr.io/agentplexus/stats-agent-research:latest
     Description: Container image for research agent
 
   SynthesisContainerImage:
     Type: String
-    Default: ghcr.io/agentplexus/stats-synthesis:latest
+    Default: ghcr.io/agentplexus/stats-agent-synthesis:latest
     Description: Container image for synthesis agent
 
   VerificationContainerImage:
     Type: String
-    Default: ghcr.io/agentplexus/stats-verification:latest
+    Default: ghcr.io/agentplexus/stats-agent-verification:latest
     Description: Container image for verification agent
 
   OrchestrationContainerImage:
     Type: String
-    Default: ghcr.io/agentplexus/stats-orchestration:latest
+    Default: ghcr.io/agentplexus/stats-agent-orchestration-eino:latest
     Description: Container image for orchestration agent
 
 Resources:

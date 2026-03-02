@@ -3,7 +3,6 @@ package agentcore
 import (
 	"fmt"
 
-	"github.com/agentplexus/agentkit/platforms/agentcore/iac"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsbedrockagentcore"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
@@ -12,6 +11,7 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awssecretsmanager"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
+	"github.com/plexusone/agentkit/platforms/agentcore/iac"
 )
 
 // Type aliases for convenience - re-export from agentkit.

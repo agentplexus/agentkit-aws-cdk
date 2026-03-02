@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/agentplexus/agentkit/platforms/agentcore/iac"
+	"github.com/plexusone/agentkit/platforms/agentcore/iac"
 )
 
 func main() {
