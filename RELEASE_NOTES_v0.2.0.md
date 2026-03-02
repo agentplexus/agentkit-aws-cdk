@@ -1,16 +1,17 @@
 # AgentKit for AWS CDK v0.2.0 Release Notes
 
-**Release Date:** January 4, 2026
+**Release Date:** March 2026
 
-This release adds full AWS Bedrock AgentCore resource creation using CloudFormation L1 constructs, replacing the placeholder implementation from v0.1.0.
+This release adds full AWS Bedrock AgentCore resource creation, CLI deployment tools, and migrates the module from `agentplexus` to `plexusone` organization.
 
 ## Highlights
 
+- **Module migration** - Module path changed from `github.com/agentplexus/agentkit-aws-cdk` to `github.com/plexusone/agentkit-aws-cdk`
+- **CLI deployment tools** - New `cmd/deploy` and `cmd/push-secrets` for one-command deployments
 - **AgentCore Runtime creation** - Full `AWS::BedrockAgentCore::Runtime` resource support
 - **Runtime Endpoint creation** - Automatic `AWS::BedrockAgentCore::RuntimeEndpoint` for each agent
-- **Gateway support** - Multi-agent routing via `AWS::BedrockAgentCore::Gateway`
+- **Gateway support** - External tool integration via `AWS::BedrockAgentCore::Gateway`
 - **Protocol support** - HTTP, MCP, and A2A protocol configuration
-- **Enhanced outputs** - Runtime ARNs, IDs, Endpoint ARNs, and Gateway URLs
 
 ## New Features
 
@@ -176,7 +177,7 @@ iam:
 package main
 
 import (
-    "github.com/agentplexus/agentkit-aws-cdk/agentcore"
+    "github.com/plexusone/agentkit-aws-cdk/agentcore"
 )
 
 func main() {
@@ -212,8 +213,9 @@ stats-agent-team.GatewayUrl = https://...bedrock-agentcore.us-east-1.amazonaws.c
 
 ## Dependencies
 
-- Requires `github.com/agentplexus/agentkit v0.3.0` for new config fields
+- Requires `github.com/plexusone/agentkit v0.5.0` for shared IaC configuration
 - Uses `awsbedrockagentcore` L1 constructs from AWS CDK
+- AWS SDK Go v2 for CLI tools (secretsmanager, sts)
 
 ## Roadmap
 
@@ -239,20 +241,31 @@ stats-agent-team.GatewayUrl = https://...bedrock-agentcore.us-east-1.amazonaws.c
 
 ## Breaking Changes
 
-None. The API is backward compatible, but the underlying implementation now creates actual AWS resources instead of placeholder outputs.
+- **Module path changed** from `github.com/agentplexus/agentkit-aws-cdk` to `github.com/plexusone/agentkit-aws-cdk`
+- **Config directory changed** from `~/.agentplexus/` to `~/.plexusone/` for CLI tools
 
 ## Migration Guide
 
-No code changes required. After upgrading:
-
-1. Update agentkit dependency to v0.3.0
-2. Run `cdk diff` to see the new resources that will be created
-3. Run `cdk deploy` to create the AgentCore resources
+1. Update import paths from `github.com/agentplexus/agentkit-aws-cdk` to `github.com/plexusone/agentkit-aws-cdk`
+2. Update go.mod dependency to `github.com/plexusone/agentkit-aws-cdk v0.2.0`
+3. If using CLI tools, move config from `~/.agentplexus/` to `~/.plexusone/`
+4. Run `cdk diff` to see the new resources that will be created
+5. Run `cdk deploy` to create the AgentCore resources
 
 ## Installation
 
 ```bash
-go get github.com/agentplexus/agentkit-aws-cdk@v0.2.0
+go get github.com/plexusone/agentkit-aws-cdk@v0.2.0
+```
+
+### CLI Tools
+
+```bash
+# One-command deployment
+go install github.com/plexusone/agentkit-aws-cdk/cmd/deploy@latest
+
+# Push secrets to AWS Secrets Manager
+go install github.com/plexusone/agentkit-aws-cdk/cmd/push-secrets@latest
 ```
 
 ## License
